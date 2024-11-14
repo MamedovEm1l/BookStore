@@ -37,8 +37,8 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val books = listOf(
                 Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" ),
-                Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" ),
-                Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" ),
+                Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" )
+                //Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" ),
             )
             NavHost(
                 navController = navController,

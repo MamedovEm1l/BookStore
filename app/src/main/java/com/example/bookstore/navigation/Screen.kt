@@ -1,5 +1,6 @@
 package com.example.bookstore.navigation
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -13,6 +14,7 @@ import com.example.bookstore.screens.favorites.FavoritesScreen
 import com.example.bookstore.screens.history.OrderHistoryScreen
 import com.example.bookstore.screens.login.Data.MainScreenDataObject
 import com.example.bookstore.screens.main_screen.MainScreen
+import com.example.bookstore.screens.profile.ProfileScreen
 import com.google.type.Date
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -23,11 +25,13 @@ sealed class Screen(val route: String) {
     object Favorites : Screen("favorites")
     object Cart : Screen("cart")
     object OrderHistory : Screen("order_history")
+    object Profile : Screen("profile")
     object BookDetails : Screen("book_details/{bookId}") {
         fun createRoute(bookId: String) = "book_details/$bookId"
     }
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun AppNavHost(
     navController: NavHostController,
@@ -48,8 +52,8 @@ fun AppNavHost(
     ) {
         composable(Screen.Main.route) {
             MainScreen(
-                navData = MainScreenDataObject(),
-                onAdminClick = {}
+                onAdminClick = {},
+                navController = navController
 //                onFavoritesClick = { navController.navigate(Screen.Favorites.route) },
 //                onCartClick = { navController.navigate(Screen.Cart.route) },
 //                onOrderHistoryClick = { navController.navigate(Screen.OrderHistory.route) },
@@ -58,13 +62,19 @@ fun AppNavHost(
         }
         composable(Screen.Favorites.route) {
             FavoritesScreen(
+                navController = navController,
                 favorites = books,// Здесь можно передать список избранных книг
                 onBookClick = { book -> {} },
                 onRemoveFromFavorites = { /* Обработка удаления из избранного */ }
             )
         }
+
+        composable(Screen.Profile.route) {
+            ProfileScreen(navController)
+        }
         composable(Screen.Cart.route) {
             CartScreen(
+                navController = navController,
                 cartItems = books,
                 onBookClick = { book -> {}},
                 onCheckout = { /* Обработка оформления заказа */ }
@@ -72,8 +82,20 @@ fun AppNavHost(
         }
         composable(Screen.OrderHistory.route) {
             OrderHistoryScreen(
-                orders = listOf(Order("1", books = books, totalCost = 50.4),Order("1", books = books, totalCost = 50.4),Order("1", books = books, totalCost = 50.4),Order("1", books = books, totalCost = 50.4)), // Здесь можно передать список заказов
-                onOrderClick = { order -> { } }
+                navController = navController,
+                recentOrders = listOf(
+                    Order("1", books = books, totalCost = 50.4),
+                    Order("1", books = books, totalCost = 50.4),
+                    Order("1", books = books, totalCost = 50.4),
+                    Order("1", books = books, totalCost = 50.4)
+                ), // Здесь можно передать список заказов
+                onOrderClick = { order -> { } },
+                previousOrders = listOf(
+                    Order("1", books = books, totalCost = 50.4),
+                    Order("1", books = books, totalCost = 50.4),
+                    Order("1", books = books, totalCost = 50.4),
+                    Order("1", books = books, totalCost = 50.4)
+                )
             )
         }
         composable(Screen.BookDetails.route) { backStackEntry ->

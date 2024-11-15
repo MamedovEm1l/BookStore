@@ -25,6 +25,7 @@ import coil.compose.AsyncImage
 import com.example.bookstore.data.Book
 import com.example.bookstore.R // Убедитесь, что путь к ресурсам корректен
 import com.example.bookstore.ui.theme.ButtonColor
+import com.example.bookstore.ui.theme.CreamColor
 
 @Composable
 fun FavBookListItemUi(
@@ -66,7 +67,7 @@ fun FavBookListItemUi(
 
         Text(
             text = book.title,
-            color = ButtonColor,
+            color = CreamColor,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
             textAlign = TextAlign.Center
@@ -76,7 +77,7 @@ fun FavBookListItemUi(
 
         Text(
             text = book.description,
-            color = Color.Gray,
+            color = Color.White,
             fontSize = 16.sp,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
@@ -93,7 +94,7 @@ fun FavBookListItemUi(
             Icon(
                 painter = painterResource(id = R.drawable.store), // Замените на реальный ресурс корзины
                 contentDescription = "Add to Cart",
-                tint = ButtonColor,
+                tint = CreamColor,
                 modifier = Modifier
                     .size(40.dp)
                     .align(Alignment.BottomEnd)

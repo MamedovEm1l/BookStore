@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,10 +38,10 @@ import com.example.bookstore.ui.theme.LightCreamColor
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-//@Preview(showBackground = true)
+@Preview(showBackground = true)
 @Composable
 fun DrawerBody(
-    navData: MainScreenDataObject,
+    navData: MainScreenDataObject = MainScreenDataObject("AfUv9PxdFjUtVyNtOGjpA2z98cX2","mamedovemil366@gmail.com"),
     onAdminClick: () -> Unit = {}
 ) {
     val categoriesList = listOf(
@@ -99,7 +100,7 @@ fun DrawerBody(
                     }
                 }
             }
-            if (isAdminState.value)
+            if (isAdminState.value){
                 Button(
                     onClick = {
                         onAdminClick()
@@ -113,7 +114,20 @@ fun DrawerBody(
                 ) {
                     Text(text = "Admin panel")
                 }
-
+            }
+            Button(
+                onClick = {
+                    onAdminClick()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ButtonColor
+                )
+            ) {
+                Text(text = "Exit")
+            }
         }
     }
 }

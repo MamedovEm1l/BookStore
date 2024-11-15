@@ -139,14 +139,14 @@ fun LoginScreen(
 //                }
 //            )
         }
-        LoginButton(text = "Sign Out") {
-            signOut(
-                auth,
-                onSignUpFailure = {error ->
-                    errorState.value = error
-                }
-            )
-        }
+//        LoginButton(text = "Sign Out") {
+//            signOut(
+//                auth,
+//                onSignUpFailure = {error ->
+//                    errorState.value = error
+//                }
+//            )
+//        }
     }
 }
 

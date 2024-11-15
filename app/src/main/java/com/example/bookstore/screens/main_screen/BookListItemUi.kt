@@ -23,10 +23,11 @@ import coil.compose.AsyncImage
 import com.example.bookstore.R
 import com.example.bookstore.data.Book
 import com.example.bookstore.ui.theme.ButtonColor
+import com.example.bookstore.ui.theme.CreamColor
 
 //@Preview(showBackground = true)
 @Composable
-fun BookListItemUi(book: Book, onClick: () -> Unit) {
+fun BookListItemUi(book: Book, onClick: (Book) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -44,7 +45,7 @@ fun BookListItemUi(book: Book, onClick: () -> Unit) {
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = book.title,
-            color = ButtonColor,
+            color = CreamColor,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
             textAlign = TextAlign.Center
@@ -52,7 +53,7 @@ fun BookListItemUi(book: Book, onClick: () -> Unit) {
         Spacer(modifier = Modifier.height(5.dp))
         Text(
             text = book.description,
-            color = Color.Gray,
+            color = Color.White,
             fontSize = 16.sp,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis

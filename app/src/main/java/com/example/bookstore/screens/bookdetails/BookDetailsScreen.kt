@@ -11,6 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,7 +26,7 @@ fun BookDetailsScreen(book: Book = Book(key = "12","dgh","hiffg","100", "drama",
 ) {
     Image(
         painter = rememberAsyncImagePainter(
-            model = book.imageUrl
+            model = "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731498033781.jpg?alt=media&token=dce069a3-1b7c-4f03-82a4-5a6fd3c072e9"
         ),
         contentDescription = "BG",
         modifier = Modifier.fillMaxSize(),
@@ -49,15 +50,19 @@ fun BookDetailsScreen(book: Book = Book(key = "12","dgh","hiffg","100", "drama",
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = book.title,
-            fontSize = 24.sp,
+            text = "The Home In Lazur",
+            fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             color = ButtonColor
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Автор: ${book.title}", fontSize = 18.sp)
+        Text(text = "Автор: Emil", fontSize = 25.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Описание:", fontSize = 18.sp)
-        Text(text = book.description)
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = "Описание: Any time in life be anything along men in the street home when be along today three line ago today when going to the club he see what she do ",
+            fontSize = 23.sp,
+            textAlign = TextAlign.Center)
+        //Text(text = book.description)
     }
 }

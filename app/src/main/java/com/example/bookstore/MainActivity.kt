@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -22,6 +24,8 @@ import com.example.bookstore.screens.login.Data.LoginScreenObject
 import com.example.bookstore.screens.login.Data.MainScreenDataObject
 import com.example.bookstore.screens.login.LoginScreen
 import com.example.bookstore.screens.main_screen.MainScreen
+import com.example.bookstore.screens.profile.ProfileScreen
+import com.example.bookstore.screens.profile.data.ProfileScreenObject
 import com.example.bookstore.screens.register.RegisterScreen
 import com.example.bookstore.screens.register.data.RegisterScreenObject
 import com.google.firebase.auth.ktx.auth
@@ -37,12 +41,12 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val books = listOf(
                 Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" ),
+                Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" ),
                 Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" )
-                //Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" ),
             )
             NavHost(
                 navController = navController,
-                //startDestination = Screen.OrderHistory.route
+                //startDestination = Screen.Main.route
                 startDestination = if(auth.currentUser != null) {
                     MainScreenDataObject(auth.currentUser!!.uid, auth.currentUser?.email!!)
                 } else {
@@ -59,6 +63,10 @@ class MainActivity : ComponentActivity() {
                             navController.navigate(RegisterScreenObject)
                         }
                     )
+                }
+
+                composable (Screen.Profile.route){
+                    ProfileScreen (navController)
                 }
 
                 composable <RegisterScreenObject>{
@@ -78,7 +86,7 @@ class MainActivity : ComponentActivity() {
                     val navData = navEntry.toRoute<MainScreenDataObject>()
                     Log.d("MyLog", auth.currentUser?.email!!)
                     MainScreen(
-                        navData
+                        navController
                     ){
                         navController.navigate(AddScreenObject)
                     }
@@ -101,7 +109,8 @@ class MainActivity : ComponentActivity() {
                             Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" ),
                         ), // Здесь можно передать список избранных книг
                         onBookClick = { book -> {} },
-                        onRemoveFromFavorites = { /* Обработка удаления из избранного */ }
+                        onRemoveFromFavorites = { /* Обработка удаления из избранного */ },
+                        navController = navController
                     )
                 }
                 composable(Screen.Cart.route) {
@@ -112,20 +121,29 @@ class MainActivity : ComponentActivity() {
                             Book(key = "12","dgh","hiffg","100", "drama",  "https://firebasestorage.googleapis.com/v0/b/bookstore-d9c83.appspot.com/o/book_images%2Fimage_1731497939863.jpg?alt=media&token=e77e8a72-7456-4d49-a8bb-404697be2092" ),
                         ), // Здесь можно передать список избранных книг
                         onBookClick = { book -> {} },
-                        onCheckout = { /* Обработка оформления заказа */ }
+                        onCheckout = { /* Обработка оформления заказа */ },
+                        navController
                     )
                 }
                 composable(Screen.OrderHistory.route) {
                     OrderHistoryScreen(
-                        orders = listOf(
+                        recentOrders = listOf(
                             Order("1", books = books, totalCost = 50.4),
                             Order("1", books = books, totalCost = 50.4),
                             Order("1", books = books, totalCost = 50.4),
                             Order("1", books = books, totalCost = 50.4)
                         ), // Здесь можно передать список заказов
-                        onOrderClick = { order -> /* Обработка выбора заказа */ }
+                        onOrderClick = { order -> /* Обработка выбора заказа */ },
+                        previousOrders = listOf(
+                            Order("1", books = books, totalCost = 50.4),
+                            Order("1", books = books, totalCost = 50.4),
+                            Order("1", books = books, totalCost = 50.4),
+                            Order("1", books = books, totalCost = 50.4)
+                        ),
+                        navController = navController
                     )
                 }
+
                 composable(Screen.BookDetails.route) { backStackEntry ->
                     val bookId = backStackEntry.arguments?.getString("bookId")
                     // Получение книги по bookId

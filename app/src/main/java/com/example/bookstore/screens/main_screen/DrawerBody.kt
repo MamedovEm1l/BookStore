@@ -1,6 +1,5 @@
 package com.example.bookstore.screens.main_screen
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,33 +16,35 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.bookstore.R
-import com.example.bookstore.screens.login.Data.MainScreenDataObject
-import com.example.bookstore.screens.main_screen.Composables.Item
+import com.example.bookstore.composables.Item
+import com.example.bookstore.model.Screen
 import com.example.bookstore.ui.theme.ButtonColor
 import com.example.bookstore.ui.theme.CreamColor
 import com.example.bookstore.ui.theme.LightCreamColor
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.example.bookstore.viewmodel.LoginViewModel
+import com.example.bookstore.viewmodel.MainViewModel
+import com.example.bookstore.viewmodel.RegisterViewModel
 
-@Preview(showBackground = true)
 @Composable
 fun DrawerBody(
-    navData: MainScreenDataObject = MainScreenDataObject("AfUv9PxdFjUtVyNtOGjpA2z98cX2","mamedovemil366@gmail.com"),
+    mainViewModel: MainViewModel = viewModel(),
+    navController: NavController,
     onAdminClick: () -> Unit = {}
 ) {
+    val loginViewModel: LoginViewModel = viewModel()
+    val registerViewModel: RegisterViewModel = viewModel()
+
     val categoriesList = listOf(
         "Favorites",
         "Fantasy",
@@ -51,15 +52,6 @@ fun DrawerBody(
         "Bestsellers"
     )
 
-    val isAdminState = remember {
-        mutableStateOf(false)
-    }
-
-    LaunchedEffect(Unit) {
-        isAdmin(navData) { isAdmin ->
-            isAdminState.value = isAdmin
-        }
-    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -100,7 +92,7 @@ fun DrawerBody(
                     }
                 }
             }
-            if (isAdminState.value){
+            if (mainViewModel.isAdminState.collectAsState().value){
                 Button(
                     onClick = {
                         onAdminClick()
@@ -117,7 +109,12 @@ fun DrawerBody(
             }
             Button(
                 onClick = {
-                    onAdminClick()
+                    mainViewModel.logout(
+                        loginViewModel = loginViewModel,
+                        registerViewModel = registerViewModel
+                    ) {
+                        navController.navigate(Screen.Login.route)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -132,9 +129,3 @@ fun DrawerBody(
     }
 }
 
-fun isAdmin(navData: MainScreenDataObject, onAdmin: (Boolean) -> Unit) {
-    Firebase.firestore.collection("admin")
-        .document(navData.uid).get().addOnSuccessListener {
-        onAdmin(it.get("isAdmin") as Boolean)
-    }
-}

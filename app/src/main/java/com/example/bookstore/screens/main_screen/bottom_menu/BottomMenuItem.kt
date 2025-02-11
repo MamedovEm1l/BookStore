@@ -1,7 +1,7 @@
 package com.example.bookstore.screens.main_screen.bottom_menu
 
 import com.example.bookstore.R
-import com.example.bookstore.navigation.Screen
+import com.example.bookstore.model.Screen
 
 sealed class BottomMenuItem(
     val route: String,

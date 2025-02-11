@@ -1,56 +1,111 @@
 package com.example.bookstore.screens.main_screen
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.bookstore.R
-import com.example.bookstore.data.Book
-import com.example.bookstore.screens.login.Data.MainScreenDataObject
-import com.example.bookstore.screens.main_screen.Composables.BottomMenu
+import com.example.bookstore.composables.BookListItemUi
+import com.example.bookstore.composables.BottomMenu
+import com.example.bookstore.composables.FilterSection
+import com.example.bookstore.model.Book
+import com.example.bookstore.model.Screen
+import com.example.bookstore.screens.main_screen.bottom_menu.BottomMenuItem
 import com.example.bookstore.ui.theme.ButtonColor
 import com.example.bookstore.ui.theme.CreamColor
-import com.example.bookstore.ui.theme.FilterColor2
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
+import com.example.bookstore.viewmodel.MainViewModel
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
-@Preview(showBackground = true)
 @Composable
 fun MainScreen(
-    navController: NavController = NavController(context = TODO()),
-    navData: MainScreenDataObject = MainScreenDataObject("AfUv9PxdFjUtVyNtOGjpA2z98cX2","mamedovemil366@gmail.com"),
+    navController: NavController,
+    onBookEditClick: (Book) -> Unit,
+    mainViewModel: MainViewModel = viewModel(),
     onAdminClick: () -> Unit = {}
 ) {
+    val books by mainViewModel.bookList.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val bookListState = remember { mutableStateOf(emptyList<Book>()) }
+    val maxCardHeight = remember { mutableStateOf(0.dp) }
+    val selectedBottomItemState = remember {
+        mutableStateOf(BottomMenuItem.Home.title)
+    }
+
+    val searchQuery = remember { mutableStateOf("") }
+    val openDeleteDialog = remember { mutableStateOf(false) }
+    val bookToDelete = remember { mutableStateOf<Book?>(null) }
 
     LaunchedEffect(Unit) {
-        val db = Firebase.firestore
-        getAllBooks(db) { books ->
-            bookListState.value = books
-        }
+       mainViewModel.loadBooks()
     }
+
+    if (openDeleteDialog.value && bookToDelete.value != null) {
+        AlertDialog(
+            onDismissRequest = { openDeleteDialog.value = false },
+            title = { Text("Удалить книгу?") },
+            text = { Text("Вы уверены, что хотите удалить эту книгу?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // Удаляем книгу из базы данных
+                        bookToDelete.value?.let { mainViewModel.deleteBook(it) }
+                        openDeleteDialog.value = false
+                    }
+                ) {
+                    Text("Удалить")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { openDeleteDialog.value = false }) {
+                    Text("Отмена")
+                }
+            }
+        )
+    }
+
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -59,8 +114,8 @@ fun MainScreen(
             Column(
                 modifier = Modifier.fillMaxWidth(0.7f)
             ) {
-                DrawerHeader(navData.email)
-                DrawerBody(navData) {
+                DrawerHeader(Firebase.auth.currentUser?.email ?: "Guest")
+                DrawerBody(mainViewModel, navController) {
                     coroutineScope.launch {
                         drawerState.close()
                     }
@@ -74,10 +129,10 @@ fun MainScreen(
                 .fillMaxSize()
                 .background(CreamColor),
             topBar = {
-                TopBar()
+                TopBar(navController)
             },
             bottomBar = {
-                BottomMenu(navController = navController)
+                BottomMenu(navController = navController, selectedBottomItemState.value)
             }
         ) { paddingValues ->
             Column(
@@ -85,7 +140,14 @@ fun MainScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                SearchBar()
+                SearchBar(
+                    searchQuery.value,
+                    onQueryChange = { query ->
+                        searchQuery.value = query
+                        mainViewModel.searchBooks(query)
+                    }
+                )
+                FilterSection(viewModel = mainViewModel)
                 CategorySection()
                 PopularSection()
                 LazyVerticalGrid(
@@ -95,8 +157,25 @@ fun MainScreen(
                         .background(CreamColor)
                         .padding(8.dp)
                 ) {
-                    items(bookListState.value) { book ->
-                        BookListItemUi(book, {})
+                    items(books) { book ->
+                        BookListItemUi(
+                            book = book,
+                            onEditClick = { onBookEditClick(book) },
+                            onDeleteClick = {
+                                bookToDelete.value = book
+                                openDeleteDialog.value = true
+                            },
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .onGloballyPositioned { coordinates ->
+                                    val height = coordinates.size.height.dp
+                                    if (height > maxCardHeight.value) {
+                                        maxCardHeight.value = height
+                                    }
+                                }
+                        ) { selectedBook ->
+                            navController.navigate(Screen.BookDetails.createRoute(selectedBook.key))
+                        }
                     }
                 }
             }
@@ -105,7 +184,7 @@ fun MainScreen(
 }
 
 @Composable
-fun TopBar() {
+fun TopBar(navController:NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,7 +193,7 @@ fun TopBar() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(onClick = { /* Open drawer */ }) {
+        IconButton(onClick = { navController.navigate(Screen.Main.route) }) {
             Icon(
                 painter = painterResource(R.drawable.ic_home),
                 contentDescription = "Menu Icon",
@@ -127,7 +206,7 @@ fun TopBar() {
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
-        IconButton(onClick = { /* Open cart or notifications */ }) {
+        IconButton(onClick = { navController.navigate(Screen.Basket.route)  }) {
             Icon(
                 painter = painterResource(R.drawable.store),
                 contentDescription = "Cart Icon",
@@ -137,12 +216,13 @@ fun TopBar() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar() {
+fun SearchBar( query: String,
+               onQueryChange: (String) -> Unit
+) {
     TextField(
-        value = "",
-        onValueChange = { /* Handle search text */ },
+        value = query,
+        onValueChange = onQueryChange,
         placeholder = { Text("Поиск", color = Color.Gray) },
         leadingIcon = {
             Icon(
@@ -157,7 +237,7 @@ fun SearchBar() {
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(Color.White),
-        colors = TextFieldDefaults.textFieldColors(
+        colors = TextFieldDefaults.colors(
             focusedIndicatorColor = ButtonColor,
             unfocusedIndicatorColor = ButtonColor
         )
@@ -223,18 +303,4 @@ fun PopularSection() {
             modifier = Modifier.clickable { /* Show all popular items */ }
         )
     }
-}
-
-private fun getAllBooks(
-    db: FirebaseFirestore,
-    onBooks: (List<Book>) -> Unit
-) {
-    db.collection("books")
-        .get()
-        .addOnSuccessListener { task ->
-            onBooks(task.toObjects(Book::class.java))
-        }
-        .addOnFailureListener {
-            // Handle errors
-        }
 }

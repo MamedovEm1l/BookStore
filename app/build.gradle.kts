@@ -48,10 +48,11 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage)
     implementation(libs.xcoil.compose)
     implementation(libs.firebase.auth)
-
+    testImplementation (libs.kotlinx.coroutines.test.v1101)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -60,7 +61,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.junit.junit)
     testImplementation(libs.junit)
+    testImplementation (libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
